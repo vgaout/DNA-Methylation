@@ -16,7 +16,7 @@ report.dir <- file.path(analysis.dir, "reports")
 
 ##Establishing identifiers of interest
 
-rnb.options(filtering.sex.chromosomes.removal=TRUE,identifiers.column="GEO")
+rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method = "swan", filtering.deviation.threshold = 0.2)
 
 ##Run quality analysis
 
