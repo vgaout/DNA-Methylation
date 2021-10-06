@@ -1,0 +1,23 @@
+#Quality control with RnBeads
+
+##Importing dependencies
+
+library(RnBeads)
+library(RnBeads.hg19)
+library(wateRmelon)
+
+##Establishment of the working directory
+
+data.dir <-"/home/vera/Desktop/microarray"
+idat.dir <- file.path(data.dir, "data")
+sample.annotation <- file.path(data.dir, "sample_annotation_VG.csv")
+analysis.dir <- "/home/vera/Desktop/microarray/analysis"
+report.dir <- file.path(analysis.dir, "reports")
+
+##Establishing identifiers of interest
+
+rnb.options(filtering.sex.chromosomes.removal=TRUE,identifiers.column="GEO")
+
+##Run quality analysis
+
+rnb.run.analysis(dir.reports=report.dir, sample.sheet=sample.annotation,data.dir=idat.dir, data.type="infinium.idat.dir")
