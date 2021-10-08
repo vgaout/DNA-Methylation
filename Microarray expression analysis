@@ -1,0 +1,18 @@
+##Microarray expression analysis (GeneChip Human Gene 2.0 ST)
+
+library(affy)
+library(affyPLM)
+library(limma)
+library(oligo)
+library(pd.hugene.2.0.st)
+library(oligoData)
+expresion_dir<-"/home/vera/Desktop/microarray/expression"
+pDataFile <- file.path(expresion_dir, "phenodata.csv")
+pData <- read.table(pDataFile, header=TRUE, sep=",")
+
+##Importing affymetrix data
+celFiles <- list.celfiles("/home/vera/Desktop/microarray/expression", full.names=TRUE)
+rawData <- read.celfiles(celFiles)
+
+ppData <- rma(rawData)
+class(ppData)
