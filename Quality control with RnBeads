@@ -16,7 +16,7 @@ report.dir <- file.path(analysis.dir, "reports")
 
 ##Establishing identifiers of interest
 
-rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method = "swan", filtering.deviation.threshold = 0.2, filtering.greedycut.pvalue.threshold=0.01)
+rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method = "swan",export.to.csv=TRUE)
 
 ##Run quality analysis
 
