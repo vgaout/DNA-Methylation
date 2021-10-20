@@ -1,3 +1,18 @@
+#Samples were downloaded from ENA
+
+##SRR67794478-->H3K27ac_C
+##SRR67794479-->H3K27ac_DAC
+
+##SRR67794484-->H3K9ac_C
+##SRR67794485-->H3K9ac_DAC
+
+##SRR67794490-->Inp_C
+##SRR67794491-->Inp_DAC
+
+#Quality was assesed with FastQC v0.11.5
+
+
+
 #Bowtie index generation
 
 bowtie-build /home/vera/Desktop/genome/human/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38
