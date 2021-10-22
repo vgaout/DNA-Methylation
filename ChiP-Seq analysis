@@ -9,46 +9,63 @@
 ##SRR67794490-->Inp_C
 ##SRR67794491-->Inp_DAC
 
-#Quality was assesed with FastQC v0.11.5
+#Quality was assesed with FastQC (v 0.11.5)
 
-
+fastq -t 2 *.fastq
 
 #Bowtie index generation
 
-bowtie-build /home/vera/Desktop/genome/human/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38
+bowtie-build ~/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa ~/bowtie_index_GRCh38
 
-#Bowtie alignment
+#Bowtie alignment (v 1.3.1)
 
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794478.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K27ac_C.bam
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794479.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K27ac_DAC.bam
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794484.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K9ac_C.bam
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794485.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K9ac_DAC.bam
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794490.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/Input_C.bam
-bowtie --threads 26 --best --chunkmbs 200 -x /home/vera/Desktop/ChiP-Seq/bowtie_index_GRCh38 -q SRR6794491.1.fastq -S | samtools view -bS - > /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/Input_DAC.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q Input_C.fastq -3 1 -S | samtools view -bS - > alignments/Input_C.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q H3K27ac_C.fastq -3 1 -S | samtools view -bS - > alignments/H3K27ac_C.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q H3K9ac_C.fastq -3 1 -S | samtools view -bS - > alignments/H3K9ac_C.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q Input_DAC.fastq -3 1 -S | samtools view -bS - > alignments/Input_DAC.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q H3K27ac_DAC.fastq -3 1 -S | samtools view -bS - > alignments/H3K27ac_DAC.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38 -q H3K9ac_DAC.fastq -3 1 -S | samtools view -bS - > alignments/H3K9ac_DAC.bam
 
-#Sorting with samtools
+#Sorting with samtools (v 1.13)
 
-samtools sort -o H3K27ac_C_sorted.bam H3K27ac_C.bam 
-samtools sort -o H3K27ac_DAC_sorted.bam H3K27ac_DAC.bam
-samtools sort -o H3K9ac_C_sorted.bam H3K9ac_C.bam 
-samtools sort -o H3K9ac_DAC_sorted.bam H3K9ac_DAC.bam
 samtools sort -o Input_C_sorted.bam Input_C.bam
+samtools sort -o H3K27ac_C_sorted.bam H3K27ac_C.bam 
+samtools sort -o H3K9ac_C_sorted.bam H3K9ac_C.bam 
 samtools sort -o Input_DAC_sorted.bam Input_DAC.bam 
+samtools sort -o H3K27ac_DAC_sorted.bam H3K27ac_DAC.bam
+samtools sort -o H3K9ac_DAC_sorted.bam H3K9ac_DAC.bam
 
-#Picard to remove duplicates
+#Mark and remove duplicates with Piccard (v 2.26.3)
 
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K27ac_C_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_H3K27ac_C.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_H3K27ac_C.txt
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K27ac_DAC_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_H3K27ac_DAC.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_H3K27ac_DAC.txt
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K9ac_C_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_H3K9ac_C.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_H3K9ac_C.txt
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/H3K9ac_DAC_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_H3K9ac_DAC.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_H3K9ac_DAC.txt
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/Input_C_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_Input_C.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_Input_C.txt
-java -jar picard.jar MarkDuplicates -I /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/Input_DAC_sorted.bam -O /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_duplicates_Input_DAC.bam -M /home/vera/Desktop/ChiP-Seq/samples/alignments_bowtie/duplicates/marked_dup_metrics_Input_DAC.txt
+java -jar picard.jar MarkDuplicates -I Input_C_sorted.bam -O marked_duplicates/w_o_duplicates/Input_C_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_Input_C.txt
+java -jar picard.jar MarkDuplicates -I H3K27ac_C_sorted.bam -O marked_duplicates/w_o_duplicates/H3K27ac_C_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_H3K27ac_C.txt
+java -jar picard.jar MarkDuplicates -I H3K9ac_C_sorted.bam -O marked_duplicates/w_o_duplicates/H3K9ac_C_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_H3K9ac_C.txt
+java -jar picard.jar MarkDuplicates -I Input_DAC_sorted.bam -O marked_duplicates/w_o_duplicates/Input_DAC_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_Input_DAC.txt
+java -jar picard.jar MarkDuplicates -I H3K27ac_DAC_sorted.bam -O marked_duplicates/w_o_duplicates/H3K27ac_DAC_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_H3K27ac_DAC.txt
+java -jar picard.jar MarkDuplicates -I H3K9ac_DAC_sorted.bam -O marked_duplicates/w_o_duplicates/H3K9ac_DAC_no_duplicates.bam --REMOVE_DUPLICATES -M marked_dup_metrics_H3K9ac_DAC.txt
 
-#Unmapped reads filtering
+#Eliminate unmapped reads and low quality reads with samtools
 
-samtools view -F 4 -q 20 marked_duplicates_H3K27ac_C.bam -o H3K27ac_C_filtered.bam
-samtools view -F 4 -q 20 marked_duplicates_H3K27ac_DAC.bam -o H3K27ac_DAC_filtered.bam
-samtools view -F 4 -q 20 marked_duplicates_H3K9ac_C.bam -o H3K9ac_C_filtered.bam
-samtools view -F 4 -q 20 marked_duplicates_H3K9ac_DAC.bam -o H3K9ac_DAC_filtered.bam
-samtools view -F 4 -q 20 marked_duplicates_Input_C.bam -o Input_C_filtered.bam
-samtools view -F 4 -q 20 marked_duplicates_Input_DAC.bam -o Input_DAC_filtered.bam
+samtools view -F 4 -q 20 Input_C_no_duplicates.bam -o FINAL/Input_C_filtered.bam
+samtools view -F 4 -q 20 H3K27ac_C_no_duplicates.bam -o FINAL/H3K27ac_C_filtered.bam
+samtools view -F 4 -q 20 H3K9ac_C_no_duplicates.bam -o FINAL/H3K9ac_C_filtered.bam
+samtools view -F 4 -q 20 Input_DAC_no_duplicates.bam -o FINAL/Input_DAC_filtered.bam
+samtools view -F 4 -q 20 H3K27ac_DAC_no_duplicates.bam -o FINAL/H3K27ac_DAC_filtered.bam
+samtools view -F 4 -q 20 H3K9ac_DAC_no_duplicates.bam -o FINAL/H3K9ac_DAC_filtered.bam
+
+#Make an index for each bam file with samtools
+
+samtools index Input_C_filtered.bam 
+samtools index H3K27ac_C_filtered.bam 
+samtools index H3K9ac_C_filtered.bam 
+samtools index Input_DAC_filtered.bam 
+samtools index H3K27ac_DAC_filtered.bam 
+samtools index H3K9ac_DAC_filtered.bam 
+
+#Peak calling with MACS (v1.4.2)
+
+macs -t H3K27ac_C_filtered.bam -c Input_C_filtered.bam -n H3K27ac_C -g hs -O peaks 
+macs -t H3K9ac_C_filtered.bam -c Input_C_filtered.bam -n H3K9ac_C -g hs -O peaks 
+macs -t H3K27ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K27ac_DAC -g hs -O peaks 
+macs -t H3K9ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K9ac_DAC -g hs -O peaks 
+
