@@ -62,15 +62,12 @@ samtools index Input_DAC_filtered.bam
 samtools index H3K27ac_DAC_filtered.bam 
 samtools index H3K9ac_DAC_filtered.bam 
 
-#Peak calling with MACS (v1.4.2)
+#Peak calling with MACS2 (v2.2.7.1)
 
-macs -t H3K27ac_C_filtered.bam -c Input_C_filtered.bam -n H3K27ac_C -g hs -O peaks 
-macs -t H3K9ac_C_filtered.bam -c Input_C_filtered.bam -n H3K9ac_C -g hs -O peaks 
-macs -t H3K27ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K27ac_DAC -g hs -O peaks 
-macs -t H3K9ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K9ac_DAC -g hs -O peaks 
-
-
-
+macs2 callpeak -t H3K27ac_C_filtered.bam -c Input_C_filtered.bam -n H3K27ac_C -g hs --outdir peaks
+macs2 callpeak -t H3K9ac_C_filtered.bam -c Input_C_filtered.bam -n H3K9ac_C -g hs --outdir peaks
+macs2 callpeak -t H3K27ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K27ac_DAC -g hs --outdir peaks
+macs2 callpeak -t H3K9ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K9ac_DAC -g hs --outdir peaks
 
 
 
