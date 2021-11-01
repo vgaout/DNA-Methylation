@@ -69,3 +69,31 @@ macs -t H3K9ac_C_filtered.bam -c Input_C_filtered.bam -n H3K9ac_C -g hs -O peaks
 macs -t H3K27ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K27ac_DAC -g hs -O peaks 
 macs -t H3K9ac_DAC_filtered.bam -c Input_DAC_filtered.bam -n H3K9ac_DAC -g hs -O peaks 
 
+
+
+
+
+
+
+#Creating an artificial genome using Drosophila and Human chromosomes to analyze Spike-in ChiP-Seq Data
+
+##Using al chromosome Drosophila sequences to create a Drosophila Primary Assembly
+
+cat Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.2L.fa Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.2R.fa Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.3L.fa
+Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.3R.fa Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.X.fa Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.Y.fa
+Drosophila_melanogaster.BDGP6.32.dna.primary_assembly.mitochondrion_genome.fa > Drosophila.primary.assembly.fa
+
+##Make an artificial genome using Human and Drosophila Primary Assemblies
+
+cat Drosophila.primary.assembly.fa Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa > drosophila_human_primary.assembly.fa
+
+#Generate an index for spike-in genome
+
+bowtie-build  drosophila_human_primary.assembly.fa ~/bowtie_index_GRCh38_Drosophila_spike_in
+
+
+
+
+
+
+
