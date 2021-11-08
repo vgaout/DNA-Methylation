@@ -88,6 +88,13 @@ cat Drosophila.primary.assembly.fa Homo_sapiens.GRCh38.dna_sm.primary_assembly.f
 
 bowtie-build  drosophila_human_primary.assembly.fa ~/bowtie_index_GRCh38_Drosophila_spike_in
 
+#Bowtie alignment against artificial genome (v 1.3.1)
+
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38_Drosophila_spike_in -q Input.fastq -S | samtools view -bS - > alignments/Input_vavouri.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38_Drosophila_spike_in -q Control_H3K36me3.fastq -S | samtools view -bS - > alignments/H3K36me3_C_vavouri.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38_Drosophila_spike_in -q DAC_H3K36me3.fastq -S | samtools view -bS - > alignments/H3K36me3_DAC_vavouri.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38_Drosophila_spike_in -q Control_H3K4me1.fastq -S | samtools view -bS - > alignments/H3K4me1_C_vavouri.bam
+bowtie -p 34 --best --chunkmbs 200 -x ~/bowtie_index_GRCh38_Drosophila_spike_in -q DAC_H3K4me1.fastq -S | samtools view -bS - > alignments/H3K4me1_DAC_vavouri.bam
 
 
 
