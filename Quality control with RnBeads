@@ -3,8 +3,10 @@
 ##Importing dependencies
 
 library(RnBeads)
-library(RnBeads.hg19)
+library(RnBeads.hg38)
 library(wateRmelon)
+library(GenomicRanges)
+library(Repitools)
 
 ##Establishment of the working directory
 
@@ -16,10 +18,50 @@ report.dir <- file.path(analysis.dir, "reports")
 
 ##Establishing identifiers of interest
 
-rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method = "swan",export.to.csv=TRUE)
+rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method ="swan", export.to.csv=TRUE, export.to.bed=TRUE, filtering.sex.chromosomes.removal=FALSE, filtering.cross.reactive=TRUE,filtering.snp=3, assembly="hg38")
 
 ##Run quality analysis
 
 rnb.run.analysis(dir.reports=report.dir, sample.sheet=sample.annotation,data.dir=idat.dir, data.type="infinium.idat.dir")
 
 
+#Regions Definition - We import the output from RnBeads
+
+cpgislands_1 <- read.csv("~/Desktop/microarray/analysis_hg38/reports/differential_methylation_data/diffMethTable_region_cmp1_cpgislands.csv")
+promoters_1 <- read.csv("~/Desktop/microarray/analysis_hg38/reports/differential_methylation_data/diffMethTable_region_cmp1_promoters.csv")
+
+
+#Generate Genomic Ranges
+
+gr_cpgs_1 <- makeGRangesFromDataFrame(cpgislands_1, keep.extra.columns = TRUE)
+gr_promoters_1<- makeGRangesFromDataFrame(promoters_1, keep.extra.columns = TRUE)
+table(overlapsAny(gr_cpgs_1, gr_promoters_1)) 
+table(overlapsAny( gr_promoters_1,gr_cpgs_1)) 
+
+#Extract overlapping regions
+
+prom_cpgs_1<-subsetByOverlaps(gr_promoters_1, gr_cpgs_1)
+prom_out_1<-subsetByOverlaps(gr_promoters_1, gr_cpgs_1,invert = TRUE)
+cpgs_out_1<-subsetByOverlaps(gr_cpgs_1,gr_promoters_1,invert = TRUE)
+
+prom_cpgs_1<-annoGR2DF(prom_cpgs_1)
+prom_out_1<-annoGR2DF(prom_out_1)
+cpgs_out_1<-annoGR2DF(cpgs_out_1)
+
+#Define methylated and not methylated regions
+
+meth_prom_cpgs_1<-prom_cpgs_1[prom_cpgs_1$mean.mean.ctrl>=0.3,]
+no_meth_prom_cpgs_1<-prom_cpgs_1[prom_cpgs_1$mean.mean.ctrl<0.3,]
+meth_prom_out_1<-prom_out_1[prom_out_1$mean.mean.ctrl>=0.3,]
+no_meth_prom_out_1<-prom_out_1[prom_out_1$mean.mean.ctrl<0.3,]
+meth_cpgs_out_1<-cpgs_out_1[cpgs_out_1$mean.mean.ctrl>=0.3,]
+no_meth_cpgs_out_1<-cpgs_out_1[cpgs_out_1$mean.mean.ctrl<0.3,]
+
+#Select regions of interest: those that are not methylated in any condition (beta<0.3 in ctrl and DAC) and those in which the treatment made no effect (FDR<0.05)
+
+no_met_prom_cpgs_U937<-no_meth_prom_cpgs_1[no_meth_prom_cpgs_1$mean.mean.ctrl<0.3 && no_meth_prom_cpgs_1$mean.mean.DAC<0.3,]
+no_change_prom_cpgs_U937<-meth_prom_cpgs_1[meth_prom_cpgs_1$comb.p.adj.fdr>=0.05,]
+no_met_prom_out_U937<-no_meth_prom_out_1[no_meth_prom_out_1$mean.mean.ctrl<0.3 && no_meth_prom_out_1$mean.mean.DAC<0.3,]
+no_change_prom_out_U937<-meth_prom_out_1[meth_prom_out_1$comb.p.adj.fdr>=0.05,]
+no_met_cpgs_out_U937<-no_meth_cpgs_out_1[no_meth_cpgs_out_1$mean.mean.ctrl<0.3 && no_meth_cpgs_out_1$mean.mean.DAC<0.3,]
+no_change_cpgs_out_U937<-meth_cpgs_out_1[meth_cpgs_out_1$comb.p.adj.fdr>=0.05,]
