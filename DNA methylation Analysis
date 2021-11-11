@@ -10,6 +10,7 @@ library(Repitools)
 library(bedr)
 library(nucleR)
 library(utils)
+library(rtracklayer)
 
 ##Establishment of the working directory
 
@@ -79,5 +80,7 @@ BED_no_met_prom_cpgs_U937<-convert2bed(x)
 BED_no_met_prom_cpgs_U937
 
 
+BED_no_met_prom_cpgs_U937<-makeGRangesFromDataFrame(BED_no_met_prom_cpgs_U937)
+rtracklayer::export.bed(BED_no_met_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/BED_no_met_prom_cpgs_U937.bed")
 
 
