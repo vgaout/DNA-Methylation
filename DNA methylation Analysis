@@ -71,16 +71,13 @@ no_met_cpgs_out_U937<-no_meth_cpgs_out_1[no_meth_cpgs_out_1$mean.mean.ctrl<0.3 &
 no_change_cpgs_out_U937<-meth_cpgs_out_1[meth_cpgs_out_1$comb.p.adj.fdr>=0.05,]
 
 #Exporting regions to BED
-
-no_met_prom_cpgs_U937$bed1<-paste(no_met_prom_cpgs_U937$chr,no_met_prom_cpgs_U937$start, sep = ":")
-no_met_prom_cpgs_U937$bed1<-paste(no_met_prom_cpgs_U937$bed1,no_met_prom_cpgs_U937$end, sep = "-")
-BED_no_met_prom_cpgs_U937<-bedr.sort.region(no_met_prom_cpgs_U937$bed1)
-BED_no_met_prom_cpgs_U937<-bedr.merge.region(BED_no_met_prom_cpgs_U937)
-BED_no_met_prom_cpgs_U937<-convert2bed(x)
-BED_no_met_prom_cpgs_U937
+#U937
+no_met_prom_cpgs_U937<-makeGRangesFromDataFrame(no_met_prom_cpgs_U937)
+no_change_prom_cpgs_U937<-makeGRangesFromDataFrame(no_change_prom_cpgs_U937)
+no_met_prom_out_U937<-makeGRangesFromDataFrame(no_met_prom_out_U937)
 
 
-BED_no_met_prom_cpgs_U937<-makeGRangesFromDataFrame(BED_no_met_prom_cpgs_U937)
-rtracklayer::export.bed(BED_no_met_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/BED_no_met_prom_cpgs_U937.bed")
-
+rtracklayer::export.bed(no_met_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/BED_no_met_prom_cpgs_U937.bed")
+rtracklayer::export.bed(no_change_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/no_change_prom_cpgs_U937.bed")
+rtracklayer::export.bed(no_met_prom_out_U937, "~/Desktop/ChiP-Seq/regions/no_met_prom_out_U937.bed")
 
