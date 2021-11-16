@@ -14,33 +14,58 @@ library(rtracklayer)
 
 ##Establishment of the working directory
 
+#U937
 data.dir <-"/home/vera/Desktop/microarray"
 idat.dir <- file.path(data.dir, "data")
 sample.annotation <- file.path(data.dir, "sample_annotation_VG.csv")
 analysis.dir <- "/home/vera/Desktop/microarray/analysis"
 report.dir <- file.path(analysis.dir, "reports")
 
+#HCT116
+data.dir_2 <-"/home/vera/Desktop/microarray" 
+idat.dir_2 <- file.path(data.dir_2, "vavouri") 
+sample.annotation_2 <- file.path(idat.dir_2, "SampleSheet2.csv") 
+analysis.dir_2 <- "/home/vera/Desktop/microarray/analysis_hg38_2"
+report.dir_2 <- file.path(analysis.dir_2, "reports") 
+
+
 ##Establishing identifiers of interest
 
+##U937
 rnb.options(identifiers.column="GEO",import.sex.prediction = FALSE, normalization.method ="swan", export.to.csv=TRUE, export.to.bed=TRUE, filtering.sex.chromosomes.removal=FALSE, filtering.cross.reactive=TRUE,filtering.snp=3, assembly="hg38")
 
-##Run quality analysis
+##HCT116
+rnb.options(identifiers.column="Sample_Name",import.sex.prediction = FALSE, normalization.method ="swan", export.to.csv=TRUE, export.to.bed=TRUE, filtering.sex.chromosomes.removal=FALSE, filtering.cross.reactive=TRUE,filtering.snp=3, assembly="hg38")
 
+
+
+##Run quality analysis
+##U937
 rnb.run.analysis(dir.reports=report.dir, sample.sheet=sample.annotation,data.dir=idat.dir, data.type="infinium.idat.dir")
+
+##HCT116
+rnb.run.analysis(dir.reports=report.dir_2, sample.sheet=sample.annotation_2,data.dir=idat.dir_2, data.type="infinium.idat.dir")
 
 
 #Regions Definition - We import the output from RnBeads
 
 cpgislands_1 <- read.csv("~/Desktop/microarray/analysis_hg38/reports/differential_methylation_data/diffMethTable_region_cmp1_cpgislands.csv")
 promoters_1 <- read.csv("~/Desktop/microarray/analysis_hg38/reports/differential_methylation_data/diffMethTable_region_cmp1_promoters.csv")
+cpgislands_2 <- read.csv("~/Desktop/microarray/analysis_hg38_2/reports/differential_methylation_data/diffMethTable_region_cmp1_cpgislands.csv")
+promoters_2 <- read.csv("~/Desktop/microarray/analysis_hg38_2/reports/differential_methylation_data/diffMethTable_region_cmp1_promoters.csv")
 
 
 #Generate Genomic Ranges
 
 gr_cpgs_1 <- makeGRangesFromDataFrame(cpgislands_1, keep.extra.columns = TRUE)
 gr_promoters_1<- makeGRangesFromDataFrame(promoters_1, keep.extra.columns = TRUE)
-table(overlapsAny(gr_cpgs_1, gr_promoters_1)) 
+table(overlapsAny(gr_cpgs_1, gr_promoters_1))
 table(overlapsAny( gr_promoters_1,gr_cpgs_1)) 
+
+gr_cpgs_2 <- makeGRangesFromDataFrame(cpgislands_2, keep.extra.columns = TRUE)
+gr_promoters_2<- makeGRangesFromDataFrame(promoters_2, keep.extra.columns = TRUE)
+table(overlapsAny(gr_cpgs_2, gr_promoters_2)) 
+table(overlapsAny(gr_promoters_2,gr_cpgs_2)) 
 
 #Extract overlapping regions
 
@@ -48,9 +73,17 @@ prom_cpgs_1<-subsetByOverlaps(gr_promoters_1, gr_cpgs_1)
 prom_out_1<-subsetByOverlaps(gr_promoters_1, gr_cpgs_1,invert = TRUE)
 cpgs_out_1<-subsetByOverlaps(gr_cpgs_1,gr_promoters_1,invert = TRUE)
 
+prom_cpgs_2<-subsetByOverlaps(gr_promoters_2, gr_cpgs_2)
+prom_out_2<-subsetByOverlaps(gr_promoters_2, gr_cpgs_2,invert = TRUE)
+cpgs_out_2<-subsetByOverlaps(gr_cpgs_2,gr_promoters_2,invert = TRUE)
+
 prom_cpgs_1<-annoGR2DF(prom_cpgs_1)
 prom_out_1<-annoGR2DF(prom_out_1)
 cpgs_out_1<-annoGR2DF(cpgs_out_1)
+
+prom_cpgs_2<-annoGR2DF(prom_cpgs_2)
+prom_out_2<-annoGR2DF(prom_out_2)
+cpgs_out_2<-annoGR2DF(cpgs_out_2)
 
 #Define methylated and not methylated regions
 
@@ -61,23 +94,83 @@ no_meth_prom_out_1<-prom_out_1[prom_out_1$mean.mean.ctrl<0.3,]
 meth_cpgs_out_1<-cpgs_out_1[cpgs_out_1$mean.mean.ctrl>=0.3,]
 no_meth_cpgs_out_1<-cpgs_out_1[cpgs_out_1$mean.mean.ctrl<0.3,]
 
-#Select regions of interest: those that are not methylated in any condition (beta<0.3 in ctrl and DAC) and those in which the treatment made no effect (FDR<0.05)
+meth_prom_cpgs_2<-prom_cpgs_2[prom_cpgs_2$mean.mean.CTRL>=0.3,]
+no_meth_prom_cpgs_2<-prom_cpgs_2[prom_cpgs_2$mean.mean.CTRL<0.3,]
+meth_prom_out_2<-prom_out_2[prom_out_2$mean.mean.CTRL>=0.3,]
+no_meth_prom_out_2<-prom_out_2[prom_out_2$mean.mean.CTRL<0.3,]
+meth_cpgs_out_2<-cpgs_out_2[cpgs_out_2$mean.mean.CTRL>=0.3,]
+no_meth_cpgs_out_2<-cpgs_out_2[cpgs_out_2$mean.mean.CTRL<0.3,]
+
+#Select regions of interest: those that are not methylated in any condition (beta<0.3 in ctrl and DAC) and those in which the treatment made effect (FDR<0.05)
 
 no_met_prom_cpgs_U937<-no_meth_prom_cpgs_1[no_meth_prom_cpgs_1$mean.mean.ctrl<0.3 && no_meth_prom_cpgs_1$mean.mean.DAC<0.3,]
-no_change_prom_cpgs_U937<-meth_prom_cpgs_1[meth_prom_cpgs_1$comb.p.adj.fdr>=0.05,]
+change_prom_cpgs_U937<-meth_prom_cpgs_1[meth_prom_cpgs_1$comb.p.adj.fdr<0.05,]
 no_met_prom_out_U937<-no_meth_prom_out_1[no_meth_prom_out_1$mean.mean.ctrl<0.3 && no_meth_prom_out_1$mean.mean.DAC<0.3,]
-no_change_prom_out_U937<-meth_prom_out_1[meth_prom_out_1$comb.p.adj.fdr>=0.05,]
+change_prom_out_U937<-meth_prom_out_1[meth_prom_out_1$comb.p.adj.fdr<0.05,]
 no_met_cpgs_out_U937<-no_meth_cpgs_out_1[no_meth_cpgs_out_1$mean.mean.ctrl<0.3 && no_meth_cpgs_out_1$mean.mean.DAC<0.3,]
-no_change_cpgs_out_U937<-meth_cpgs_out_1[meth_cpgs_out_1$comb.p.adj.fdr>=0.05,]
+change_cpgs_out_U937<-meth_cpgs_out_1[meth_cpgs_out_1$comb.p.adj.fdr<0.05,]
+
+no_met_prom_cpgs_HCT116<-no_meth_prom_cpgs_2[no_meth_prom_cpgs_2$mean.mean.CTRL<0.3 && no_meth_prom_cpgs_2$mean.mean.AZA<0.3,]
+change_prom_cpgs_HCT116<-meth_prom_cpgs_2[meth_prom_cpgs_2$comb.p.adj.fdr<0.05,]
+no_met_prom_out_HCT116<-no_meth_prom_out_2[no_meth_prom_out_2$mean.mean.CTRL<0.3 && no_meth_prom_out_2$mean.mean.AZA<0.3,]
+change_prom_out_HCT116<-meth_prom_out_2[meth_prom_out_2$comb.p.adj.fdr<0.05,]
+no_met_cpgs_out_HCT116<-no_meth_cpgs_out_2[no_meth_cpgs_out_2$mean.mean.CTRL<0.3 && no_meth_cpgs_out_2$mean.mean.AZA<0.3,]
+change_cpgs_out_HCT116<-meth_cpgs_out_2[meth_cpgs_out_2$comb.p.adj.fdr<0.05,]
+
 
 #Exporting regions to BED
 #U937
+##prom-cpg
 no_met_prom_cpgs_U937<-makeGRangesFromDataFrame(no_met_prom_cpgs_U937)
-no_change_prom_cpgs_U937<-makeGRangesFromDataFrame(no_change_prom_cpgs_U937)
+change_prom_cpgs_U937<-makeGRangesFromDataFrame(change_prom_cpgs_U937)
+
+##prom_only
 no_met_prom_out_U937<-makeGRangesFromDataFrame(no_met_prom_out_U937)
+change_prom_out_U937<-makeGRangesFromDataFrame(change_prom_out_U937)
+
+##cpgs_only
+no_met_cpgs_out_U937<-makeGRangesFromDataFrame(no_met_cpgs_out_U937)
+change_cpgs_out_U937<-makeGRangesFromDataFrame(change_cpgs_out_U937)
 
 
+#HCT116
+##prom-cpg
+no_met_prom_cpgs_HCT116<-makeGRangesFromDataFrame(no_met_prom_cpgs_HCT116)
+change_prom_cpgs_HCT116<-makeGRangesFromDataFrame(change_prom_cpgs_HCT116)
+
+##prom_only
+no_met_prom_out_HCT116<-makeGRangesFromDataFrame(no_met_prom_out_HCT116)
+change_prom_out_HCT116<-makeGRangesFromDataFrame(change_prom_out_HCT116)
+
+##cpgs_only
+no_met_cpgs_out_HCT116<-makeGRangesFromDataFrame(no_met_cpgs_out_HCT116)
+change_cpgs_out_HCT116<-makeGRangesFromDataFrame(change_cpgs_out_HCT116)
+
+##EXPORT REGIONS IN BED FORMAT
+##U937
+
+##prom-cpg
 rtracklayer::export.bed(no_met_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/BED_no_met_prom_cpgs_U937.bed")
-rtracklayer::export.bed(no_change_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/no_change_prom_cpgs_U937.bed")
+rtracklayer::export.bed(change_prom_cpgs_U937, "~/Desktop/ChiP-Seq/regions/change_prom_cpgs_U937.bed")
+
+##prom_only
 rtracklayer::export.bed(no_met_prom_out_U937, "~/Desktop/ChiP-Seq/regions/no_met_prom_out_U937.bed")
+rtracklayer::export.bed(change_prom_out_U937, "~/Desktop/ChiP-Seq/regions/change_prom_out_U937.bed")
+
+##cpgs_only
+rtracklayer::export.bed(no_met_cpgs_out_U937, "~/Desktop/ChiP-Seq/regions/no_met_cpgs_out_U937.bed")
+rtracklayer::export.bed(change_cpgs_out_U937, "~/Desktop/ChiP-Seq/regions/change_cpgs_out_U937.bed")
+
+##HCT116
+##prom-cpg
+rtracklayer::export.bed(no_met_prom_cpgs_HCT116, "~/Desktop/ChiP-Seq/regions/BED_no_met_prom_cpgs_HCT116.bed")
+rtracklayer::export.bed(change_prom_cpgs_HCT116, "~/Desktop/ChiP-Seq/regions/change_prom_cpgs_HCT116.bed")
+
+##prom_only
+rtracklayer::export.bed(no_met_prom_out_HCT116, "~/Desktop/ChiP-Seq/regions/no_met_prom_out_HCT116.bed")
+rtracklayer::export.bed(change_prom_out_HCT116, "~/Desktop/ChiP-Seq/regions/change_prom_out_HCT116.bed")
+
+##cpgs_only
+rtracklayer::export.bed(no_met_cpgs_out_HCT116, "~/Desktop/ChiP-Seq/regions/no_met_cpgs_out_HCT116.bed")
+rtracklayer::export.bed(change_cpgs_out_HCT116, "~/Desktop/ChiP-Seq/regions/change_cpgs_out_HCT116.bed")
 
